@@ -110,11 +110,17 @@ class AM232x(object):
     def temperature(self):
         return self._calc(4, 5)
 
+    def discomfort(self):
+        hum = self.humidity()
+        temp = self.temperature()
+        return 0.81 * temp + 0.01 * hum * (0.99 * temp - 14.3) + 46.3
+
 
 def main():
     am232x = AM232x()
     print(am232x.temperature())
     print(am232x.humidity())
+    print(am232x.discomfort())
 
 if __name__ == '__main__':
     main()
