@@ -1,7 +1,9 @@
 import time
 import smbus
+from logging import getLogger
 
 
+logger = getLogger(__name__)
 usleep = lambda x: time.sleep(x/1000000.0)
 
 
@@ -70,8 +72,12 @@ class AM232x(object):
 
     def check_err(self):
         raw = self._raw
-        if raw[2] >= 0x80:
-            pass
+        code = raw[2]
+        if code >= 0x80:
+            logger.error("{name} : Received error code : 0x{code:x}".format(name=self._name, code=code))
+            return code
+        else:
+            return None
 
     def check_crc(self):
         raw = self._raw
@@ -87,7 +93,12 @@ class AM232x(object):
                 else:
                     clc_crcsum = clc_crcsum >> 1
     
-        return rcv_crcsum == clc_crcsum
+        if rcv_crcsum == clc_crcsum:
+            return True
+        else:
+            logger.error("{name} : CRC error : [receive : 0x{receive:x}, calculate : 0x{calculate:x}]"
+                         .format(name=self._name, receive=rcv_crcsum, calculate=clc_crcsum))
+            return False
 
     def read(self, check_err=True, check_crc=True):
         if not self._measured:
