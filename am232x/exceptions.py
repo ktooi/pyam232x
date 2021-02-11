@@ -5,10 +5,11 @@ class AM232xError(Exception):
     am232x モジュールが投げる例外の基底クラスとして利用する。
     """
 
+
 class ReceiveAM232xDataError(AM232xError):
     """ AM232x からデータを受信した際に、エラーが発生したことを示すエラーコードが含まれていたことを示す Exception.
     """
-    
+
     def __init__(self, error_code, chip_name="am232x"):
         self._chip_name = chip_name
         self._error_code = error_code

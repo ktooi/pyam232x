@@ -6,7 +6,7 @@ from .exceptions import AM232xError, ReceiveAM232xDataError, AM232xCrcCheckError
 
 
 logger = getLogger(__name__)
-usleep = lambda x: time.sleep(x/1000000.0)
+usleep = lambda x: time.sleep(x/1000000.0)  # noqa
 
 
 class AM232x(object):
@@ -30,7 +30,7 @@ class AM232x(object):
 
         次のように、センサーとの通信のタイミングを細かく制御することもできます。
 
-        The timing of communication with the sensor can also be finely controlled, as shown below. 
+        The timing of communication with the sensor can also be finely controlled, as shown below.
 
         >>> from am232x import AM232x
         >>>
@@ -96,7 +96,8 @@ class AM232x(object):
                 if cnt < retry_num:
                     usleep(retry_wait)
                     cnt += 1
-                    logger.debug(("{name} : Execute the \"{func}\" was failed. retry count: {cnt}/{limit}: Exception: {exception}"
+                    logger.debug(("{name} : Execute the \"{func}\" was failed. "
+                                  "retry count: {cnt}/{limit}: Exception: {exception}"
                                   .format(name=self._name, func=func.__name__, cnt=cnt, limit=retry_num, exception=e)))
                 else:
                     raise e
@@ -147,7 +148,7 @@ class AM232x(object):
 
         try:
             i2c.write_byte_data(chip_addr, 0x00, 0x00)
-        except:
+        except Exception:
             pass  # wakeup は必ず通信が失敗する。これは AM2321/2322 の仕様。
         self._wakeup = True
         usleep(self.wait_wakeup)
