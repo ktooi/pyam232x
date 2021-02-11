@@ -1,6 +1,7 @@
 import time
 import smbus
 from logging import getLogger
+from .exceptions import AM232xError, ReceiveAM232xDataError, AM232xCrcCheckError
 
 
 logger = getLogger(__name__)
