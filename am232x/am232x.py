@@ -71,6 +71,7 @@ class AM232x(object):
         self._write_i2c_block_data(0x03, [0x00, 0x04])
         self._measured = True
         usleep(self.wait_readmode)
+        self._del_properties()
 
     def check_err(self):
         raw = self._raw
@@ -110,13 +111,23 @@ class AM232x(object):
         raw = self._raw
         return (raw[high_idx] << 8 | raw[low_idx]) / 10.0
 
+    def _del_properties(self):
+        properties = ["_humidity", "_temperature", "_discomfort"]
+        for p in properties:
+            if hasattr(self, p):
+                delattr(self, p)
+
     @property
     def humidity(self):
-        return self._calc(2, 3)
+        if not hasattr(self, "_humidity"):
+            self._humidity = self._calc(2, 3)
+        return self._humidity
 
     @property
     def temperature(self):
-        return self._calc(4, 5)
+        if not hasattr(self, "_temperature"):
+            self._temperature = self._calc(4, 5)
+        return self._temperature
 
     @property
     def discomfort(self):
