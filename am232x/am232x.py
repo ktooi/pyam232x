@@ -283,21 +283,21 @@ class AM232x(object):
 
     @property
     def humidity(self):
-        """ 湿度を取得します。 """
+        """ 湿度を取得します。単位は%です。 """
         if not hasattr(self, "_humidity"):
             self._humidity = self._calc(2, 3)
         return self._humidity
 
     @property
     def temperature(self):
-        """ 気温を取得します。 """
+        """ 気温を取得します。単位は℃です。 """
         if not hasattr(self, "_temperature"):
             self._temperature = self._calc(4, 5)
         return self._temperature
 
     @property
     def discomfort(self):
-        """ 不快指数を取得します。 """
+        """ 不快指数を取得します。指数なので単位はありません。 """
         if not hasattr(self, "_discomfort"):
             hum = self.humidity
             temp = self.temperature
