@@ -8,8 +8,6 @@ from . import AM232x
 
 # これはメインのファイルにのみ書く
 basicConfig(level=INFO)
-
-# これはすべてのファイルに書く
 logger = getLogger(__name__)
 
 
