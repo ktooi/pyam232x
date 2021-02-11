@@ -109,7 +109,7 @@ class AM232x(object):
         i2c = self._i2c
         chip_addr = self.chip_addr
         cur_time = time.time()
-        
+
         try:
             i2c.write_byte_data(chip_addr, 0x00, 0x00)
         except:
@@ -224,6 +224,7 @@ def main():
     print(am232x.temperature)
     print(am232x.humidity)
     print(am232x.discomfort)
+
 
 if __name__ == '__main__':
     main()
