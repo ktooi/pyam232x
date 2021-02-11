@@ -70,6 +70,19 @@ class AM232x(object):
             self.wakeup()
 
     def _func_i2c_retry(self, func, args, retry_wait=None, retry_num=None):
+        """ AM2321/AM2322 との I2C 通信を制御するメソッドです。
+
+        このセンサーは頻繁に I2C 通信に失敗し IOError が送出されるので、 I2C 通信をリトライさせます。
+
+        A読み込み
+            func(func): I2C 通信を行う関数。
+            args(tuple): func に渡す引数一式。
+            retry_wait(int): リトライ時の待機時間。マイクロ秒で指定する。指定がない場合は、インスタンス初期化時の retry_wait が利用される。
+            retry_num(int): 最大リトライ回数。指定がない場合は、インスタンス初期化時の retry_cnt が利用される。
+
+        Raises:
+            IOError: 最大リトライ回数に達してなお IOError が raise される場合に、最後に送出された IOError をそのまま呼び出し元に送出する。
+        """
         chip_addr = self.chip_addr
         if retry_wait is None:
             retry_wait = self._retry_wait
@@ -89,21 +102,43 @@ class AM232x(object):
                     raise e
 
     def _write_byte_data(self, register, data):
+        """ AM2321/AM2322 に1バイト書き込みを行うメソッドです。
+
+        Args:
+            register(int): 書き込みを行うアドレス。
+            data(int): 書き込みを行うデータ(1バイト)。
+        """
         i2c = self._i2c
         args = (register, data)
         self._func_i2c_retry(func=i2c.write_byte_data, args=args)
 
     def _write_i2c_block_data(self, register, data_list):
+        """ AM2321/AM2322 に複数バイト書き込みを行うメソッドです。
+
+        Args:
+            register(int): 書き込みを行うアドレス。
+            data_list(list): 書き込みを行うデータ(1バイト)のリスト。
+        """
         i2c = self._i2c
         args = (register, data_list)
         self._func_i2c_retry(func=i2c.write_i2c_block_data, args=args)
 
     def _read_i2c_block_data(self, register, length):
+        """ AM2321/AM2322 からデータを読み出すメソッドです。
+
+        Args:
+            register(int): 読み込みを行うアドレス。
+            length(int): 読み込むデータの長さ(バイト数)。
+
+        Returns:
+            list: 読み込んだデータ(バイト毎)のリスト。
+        """
         i2c = self._i2c
         args = (register, length)
         return self._func_i2c_retry(func=i2c.read_i2c_block_data, args=args, retry_wait=200000)
 
     def wakeup(self):
+        """ スリープ状態にある AM2321/AM2322 を動作させるシグナルを送出するメソッドです。"""
         if self._wakeup:
             return
         i2c = self._i2c
@@ -118,11 +153,13 @@ class AM232x(object):
         usleep(self.wait_wakeup)
 
     def set_write_mode(self):
+        """ AM2321/AM2322 を書き込みモードにするメソッドです。"""
         self._write_byte_data(0x00, 0x00)
         self._write_mode = True
         usleep(self.wait_writemode)
 
     def measure(self):
+        """ AM2321/AM2322 に、データを計測する命令を送信するメソッドです。 """
         self.wakeup()
         if not self._write_mode:
             self.set_write_mode()
@@ -135,12 +172,30 @@ class AM232x(object):
         self._del_properties()
 
     def check_err(self):
+        """ AM2321/AM2322 から受信したデータに、エラーコードが含まれていたら例外を送出するメソッドです。
+
+        読み込んだデータに対してチェックを行うため、あらかじめ read() メソッドを実行しておく必要があります。
+        (但し、 read() メソッド実行時に check_err フラグを明確に False に設定していない場合は、
+        read() メソッド内でこのメソッドが呼び出されます。このため、通常はこのメソッドを個別に呼び出す必要はありません。)
+
+        Raises:
+            ReceiveAM232xDataError: 受信したデータにエラーコードが含まれていた場合に送出される Exception.
+        """
         raw = self._raw_data
         code = raw[2]
         if code >= 0x80:
             raise ReceiveAM232xDataError(error_code=code, chip_name=self._name)
 
     def check_crc(self):
+        """ AM2321/AM2322 から受信した CRC と、受信したデータを計算して得られた CRC に相違があった場合に例外を送出するメソッドです。
+
+        読み込んだデータに対してチェックを行うため、あらかじめ read() メソッドを実行しておく必要があります。
+        (但し、 read() メソッド実行時に check_crc フラグを明確に False に設定していない場合は、
+        read() メソッド内でこのメソッドが呼び出されます。このため、通常はこのメソッドを個別に呼び出す必要はありません。)
+
+        Raises:
+            AM232xCrcCheckError: 受信した CRC と、受信したデータを計算して得られた CRC に相違があった場合に送出される Exception.
+        """
         raw = self._raw_data
         rcv_crcsum = raw[7] << 8 | raw[6]
         clc_crcsum = 0xffff
@@ -158,6 +213,18 @@ class AM232x(object):
             raise AM232xCrcCheckError(recv_crc=rcv_crcsum, calc_crc=clc_crcsum, chip_name=self._name)
 
     def read(self, check_err=True, check_crc=True, retry_num=10, retry_wait=2000000):
+        """ AM2321/AM2322 から計測したデータを読み出すメソッドです。
+
+        Args:
+            check_err(bool): check_err() メソッドを呼び出すか否か。デフォルトは True.
+            check_crc(bool): check_crc() メソッドを呼び出すか否か。デフォルトは True.
+            retry_num(int): 読み出し時に AM232xError を基底クラスにする例外が送出された場合に、最大でリトライする回数。
+            retry_wait(int): 読み出し時に AM232xError を基底クラスにする例外が送出された場合に、リトライするまでの待機時間(マイクロ秒)。
+
+        Raises:
+            ReceiveAM232xDataError: 受信したデータにエラーコードが含まれていた場合に送出される Exception.
+            AM232xCrcCheckError: 受信した CRC と、受信したデータを計算して得られた CRC に相違があった場合に送出される Exception.
+        """
         cnt = 0
         while True:
             if not self._measured:
@@ -175,7 +242,9 @@ class AM232x(object):
                         self.check_crc()
                 except AM232xError as e:
                     if cnt < retry_num:
-                        self._measured = False
+                        if isinstance(e, ReceiveAM232xDataError):
+                            # 計測データが不正であるため、再計測させる。
+                            self._measured = False
                         cnt += 1
                         logger.debug(("{name} : AM232x error was occurred. retry count: {cnt}/{limit}, Exception: {exception}"
                                       .format(name=self._name, cnt=cnt, limit=retry_num, exception=e)))
@@ -187,12 +256,26 @@ class AM232x(object):
             return self._raw_data
 
     def _calc(self, high_idx, low_idx):
+        """ AM2321/AM2322 から受信したデータを計算し、必要な情報を取得する為のメソッドです。
+
+        Args:
+            high_idx(int): 上位バイトとして利用するデータのインデックス番号。
+            low_idx(int): 下位バイトとして利用するデータのインデックス番号。
+
+        Returns:
+            float: 計算結果を戻します。
+        """
         if not hasattr(self, "_raw_data"):
             self.read()
         raw = self._raw_data
         return (raw[high_idx] << 8 | raw[low_idx]) / 10.0
 
     def _del_properties(self):
+        """ キャッシュした気温、湿度、不快指数を削除するメソッドです。
+
+        AM2321/AM2322 で再計測した場合などに、データを更新する為にこのメソッドを呼び出します。
+        通常は必要なタイミングで必要なメソッドから呼び出されるので、このメソッドを手動で呼び出す必要はないでしょう。
+        """
         properties = ["_humidity", "_temperature", "_discomfort"]
         for p in properties:
             if hasattr(self, p):
@@ -200,18 +283,21 @@ class AM232x(object):
 
     @property
     def humidity(self):
+        """ 湿度を取得します。 """
         if not hasattr(self, "_humidity"):
             self._humidity = self._calc(2, 3)
         return self._humidity
 
     @property
     def temperature(self):
+        """ 気温を取得します。 """
         if not hasattr(self, "_temperature"):
             self._temperature = self._calc(4, 5)
         return self._temperature
 
     @property
     def discomfort(self):
+        """ 不快指数を取得します。 """
         if not hasattr(self, "_discomfort"):
             hum = self.humidity
             temp = self.temperature
