@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from argparse import ArgumentParser
+import json
 from logging import basicConfig, getLogger, DEBUG, INFO
-import yaml
 from . import AM232x
 
 
@@ -13,35 +13,36 @@ basicConfig(level=INFO)
 logger = getLogger(__name__)
 
 
-def temperature(am232x, ns):
-    pass
+def temperature(am232x, args):
+    print(am232x.temperature)
 
 
-def humidity(am232x, ns):
-    pass
+def humidity(am232x, args):
+    print(am232x.humidity)
 
 
-def discomfort(am232x, ns):
-    pass
+def discomfort(am232x, args):
+    print(am232x.discomfort)
 
 
-def default(am232x, ns):
-    pass
+def default(am232x, args):
+    print("temperature : {temp}".format(temp=am232x.temperature))
+    print("humidity    : {hum}".format(hum=am232x.humidity))
+    print("discomfort  : {dscf}".format(dscf=am232x.discomfort))
 
 
-def json(am232x, ns):
-    pass
-
-
-def yaml(am232x, ns):
-    pass
+def to_json(am232x, args):
+    mesg = json.dumps({"temperature": am232x.temperature,
+                       "humidity": am232x.humidity,
+                       "discomfort": am232x.discomfort})
+    print(mesg)
 
 
 def parse_args():
     parser = ArgumentParser(description=("Measure and show temperature, humidity and discomfort from AM2321/AM2322."))
     parser.add_argument('-d', '--debug', action='store_true', help="Show verbose messages.")
-    parser.add_argument('-b', '--bus', dest="bus", type=int, help="Bus number.")
-    parser.set_defaults(func=default)
+    parser.add_argument('-b', '--bus', dest="bus", type=int, default=1, help="Bus number.")
+    parser.set_defaults(func=default, subcommand="default")
     subparsers = parser.add_subparsers(dest="subcommand")
 
     # 共通となる引数を定義。
@@ -58,10 +59,7 @@ def parse_args():
     subcmd_disc.set_defaults(func=discomfort)
 
     subcmd_disc = subparsers.add_parser("json", parents=[common_parser], help="TODO")
-    subcmd_disc.set_defaults(func=json)
-
-    subcmd_disc = subparsers.add_parser("yaml", parents=[common_parser], help="TODO")
-    subcmd_disc.set_defaults(func=yaml)
+    subcmd_disc.set_defaults(func=to_json)
 
     # 以下、ヘルプコマンドの定義。
 
@@ -86,9 +84,12 @@ def parse_args():
 
 
 def main():
-    ns = parse_args()
-    if ns.subcommand == "help":
+    args = parse_args()
+    if args.debug:
+        logger.info("Set loglevel to debug.")
+        logger.setLevel(DEBUG)
+    if args.subcommand == "help":
         # ヘルプを表示して終了。
-        ns.func(ns)
-    am232x = AM232x(name="am232x", bus=ns.bus)
-    ns.func(am232x, ns)
+        args.func(args)
+    am232x = AM232x(name="am232x", bus=args.bus)
+    args.func(am232x, args)
