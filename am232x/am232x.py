@@ -74,7 +74,7 @@ class AM232x(object):
 
         このセンサーは頻繁に I2C 通信に失敗し IOError が送出されるので、 I2C 通信をリトライさせます。
 
-        A読み込み
+        Args:
             func(func): I2C 通信を行う関数。
             args(tuple): func に渡す引数一式。
             retry_wait(int): リトライ時の待機時間。マイクロ秒で指定する。指定がない場合は、インスタンス初期化時の retry_wait が利用される。
