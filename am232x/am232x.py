@@ -74,10 +74,7 @@ class AM232x(object):
         raw = self._raw
         code = raw[2]
         if code >= 0x80:
-            logger.error("{name} : Received error code : 0x{code:x}".format(name=self._name, code=code))
-            return code
-        else:
-            return None
+            raise ReceiveAM232xDataError(error_code=code, chip_name=self._name)
 
     def check_crc(self):
         raw = self._raw
@@ -93,12 +90,8 @@ class AM232x(object):
                 else:
                     clc_crcsum = clc_crcsum >> 1
     
-        if rcv_crcsum == clc_crcsum:
-            return True
-        else:
-            logger.error("{name} : CRC error : [receive : 0x{receive:x}, calculate : 0x{calculate:x}]"
-                         .format(name=self._name, receive=rcv_crcsum, calculate=clc_crcsum))
-            return False
+        if rcv_crcsum != clc_crcsum:
+            raise AM232xCrcCheckError(recv_crc=rcv_crcsum, calc_crc=clc_crcsum, chip_name=self._name)
 
     def read(self, check_err=True, check_crc=True):
         if not self._measured:
