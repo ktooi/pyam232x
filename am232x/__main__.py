@@ -11,15 +11,25 @@ basicConfig(level=INFO)
 logger = getLogger(__name__)
 
 
+def measure(am232x, args):
+    am232x.measure()
+    am232x.read()
+    if not args.quick:
+        am232x.measure()
+
+
 def temperature(am232x, args):
+    measure(am232x, args)
     print(am232x.temperature)
 
 
 def humidity(am232x, args):
+    measure(am232x, args)
     print(am232x.humidity)
 
 
 def discomfort(am232x, args):
+    measure(am232x, args)
     print(am232x.discomfort)
 
 
@@ -40,6 +50,8 @@ def parse_args():
     parser = ArgumentParser(description=("Measure and show temperature, humidity and discomfort from AM2321/AM2322."))
     parser.add_argument('-d', '--debug', action='store_true', help="Show verbose messages.")
     parser.add_argument('-b', '--bus', dest="bus", type=int, default=1, help="Bus number.")
+    parser.add_argument('-q', '--quick', dest="quick", action='store_true',
+                        help="Quickly response mode. The response will be faster, but the output data will be outdated.")
     parser.set_defaults(func=default, subcommand="default")
     subparsers = parser.add_subparsers(dest="subcommand")
 
