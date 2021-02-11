@@ -1,0 +1,52 @@
+name: doctest
+
+on: [push]
+
+jobs:
+  unittest-and-doctest:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python # Set Python version
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      # requirements.txt を生成する
+      - name: Generate requirements.txt
+        run: python manage.py requires -o requirements.txt
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        env:
+          cache-name: python-${{ matrix.python-version }}
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.cache-name }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ env.cache-name }}-
+      # pip と pytest をインストールする
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
+          pip install -r requirements.txt
+      - name: Test with pytest
+        run: pytest --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=am232x --cov-report=xml --cov-report=html
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-results-${{ matrix.python-version }}
+          path: junit/test-results-${{ matrix.python-version }}.xml
+        # テスト失敗時にテスト結果を公開するには、always() を使用して常にこのステップを実行する
+        if: ${{ always() }}
+      - name: Upload pytest coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-cov-results-${{ matrix.python-version }}
+          path: htmlcov/
+        # テスト失敗時にテスト結果を公開するには、always() を使用して常にこのステップを実行する
+        if: ${{ always() }}
