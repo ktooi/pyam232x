@@ -47,16 +47,18 @@ def parse_args():
     common_parser = ArgumentParser(add_help=False)
     common_parser.add_argument('--unit', '-u', action='store_true', help="")
 
-    subcmd_temp = subparsers.add_parser("temperature", parents=[common_parser], help="TODO")
+    subcmd_temp = subparsers.add_parser("temperature", parents=[common_parser], help="Output temperature.")
     subcmd_temp.set_defaults(func=temperature)
 
-    subcmd_hum = subparsers.add_parser("humidity", parents=[common_parser], help="TODO")
+    subcmd_hum = subparsers.add_parser("humidity", parents=[common_parser], help="Output humidity.")
     subcmd_hum.set_defaults(func=humidity)
 
-    subcmd_disc = subparsers.add_parser("discomfort", parents=[common_parser], help="TODO")
+    subcmd_disc = subparsers.add_parser("discomfort", parents=[common_parser],
+                                        help="Output discomfort that calculated with temperature and humidity.")
     subcmd_disc.set_defaults(func=discomfort)
 
-    subcmd_disc = subparsers.add_parser("json", parents=[common_parser], help="TODO")
+    subcmd_disc = subparsers.add_parser("json", parents=[common_parser],
+                                        help="Output data that temperature, humidity and discomfort within JSON format.")
     subcmd_disc.set_defaults(func=to_json)
 
     # 以下、ヘルプコマンドの定義。
