@@ -18,7 +18,8 @@ class AM232x(object):
     wait_readmode = 30
     wait_refresh = 2000000
 
-    def __init__(self, name="am2321", bus=1, wakeup=True, retry_wait=1000, retry_num=10):
+    def __init__(self, name="am232x", bus=1, wakeup=True, retry_wait=20000, retry_num=10):
+        self._name = name
         self._i2c = smbus.SMBus(bus)
         self._bus = bus
         self._retry_wait = retry_wait
