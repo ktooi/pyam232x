@@ -69,9 +69,9 @@ def parse_args():
                                         help="Output discomfort that calculated with temperature and humidity.")
     subcmd_disc.set_defaults(func=discomfort)
 
-    subcmd_disc = subparsers.add_parser("json", parents=[common_parser],
+    subcmd_json = subparsers.add_parser("json", parents=[common_parser],
                                         help="Output data that temperature, humidity and discomfort within JSON format.")
-    subcmd_disc.set_defaults(func=to_json)
+    subcmd_json.set_defaults(func=to_json)
 
     # 以下、ヘルプコマンドの定義。
 
