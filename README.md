@@ -1,6 +1,6 @@
 # pyam232x
 
-[![Version](https://badge.fury.io/py/pyam232x.svg)](https://pypi.org/project/pyam232x/) [![CodeQL](https://github.com/ktooi/pyam232x/workflows/CodeQL/badge.svg)](https://github.com/ktooi/pyam232x/actions?query=workflow%3ACodeQL+branch%3Amain) [![doctest](https://github.com/ktooi/pyam232x/workflows/doctest/badge.svg)](https://github.com/ktooi/pyam232x/actions?query=workflow%3Adoctest+branch%3Amain) [![pep8](https://github.com/ktooi/pyam232x/workflows/pep8/badge.svg)](https://github.com/ktooi/pyam232x/actions?query=workflow%3Apep8+branch%3Amain) [![CircleCI](https://circleci.com/gh/ktooi/pyam232x/tree/main.svg?style=shield)](https://circleci.com/gh/ktooi/pyam232x/tree/main)
+[![Version](https://badge.fury.io/py/pyam232x.svg)](https://pypi.org/project/pyam232x/) [![CodeQL](https://github.com/ktooi/pyam232x/workflows/CodeQL/badge.svg)](https://github.com/ktooi/pyam232x/actions?query=workflow%3ACodeQL+branch%3Amain) [![doctest](https://github.com/ktooi/pyam232x/workflows/doctest/badge.svg)](https://github.com/ktooi/pyam232x/actions?query=workflow%3Adoctest+branch%3Amain) [![pep8](https://github.com/ktooi/pyam232x/workflows/pep8/badge.svg)](https://github.com/ktooi/pyam232x/actions?query=workflow%3Apep8+branch%3Amain)
 
 pyam232x は、 AM2321/AM2322 という温湿度センサーを制御する為のコマンドと API 一式です。
 
