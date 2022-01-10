@@ -81,7 +81,10 @@ def parse_args():
     # subparsers.choices の変更が反映されないように list 化したものを subcmd_list に代入しておく。
     subcmd_list = list(subparsers.choices.keys())
 
+    # この行は `subcmd_list` のリスト作成より後に実行しなければならない。
+    # この順番を守らないと、 `subcmd_list` に "help" が含まれてしまう。
     subcmd_help = subparsers.add_parser("help", help="Help is shown.")
+
     # add_argument() の第一引数を "subcommand" としてはならない。
     # `mcbdsc help build` 等と実行した際に、
     # >>> args = parser.parse_args()
