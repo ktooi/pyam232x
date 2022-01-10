@@ -93,9 +93,14 @@ def parse_args():
     # このため、ここでは第一引数を "subcmd" とし、 metavar="subcommand" とすることで
     # ヘルプ表示上は "subcommand" としたまま、 `args.subcommand` が "help" となるよう対応する。
     subcmd_help.add_argument("subcmd", metavar="subcommand", choices=subcmd_list, help="Command name which help is shown.")
-    subcmd_help.set_defaults(func=lambda args: print(parser.parse_args([args.subcmd, '--help'])))
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.subcommand == "help":
+        # ヘルプを表示して終了。
+        parser.parse_args([args.subcmd, '--help'])
+    
+    return args
 
 
 def main():
@@ -103,8 +108,5 @@ def main():
     if args.debug:
         logger.info("Set loglevel to debug.")
         logger.setLevel(DEBUG)
-    if args.subcommand == "help":
-        # ヘルプを表示して終了。
-        args.func(args)
     am232x = AM232x(name="am232x", bus=args.bus)
     args.func(am232x, args)
