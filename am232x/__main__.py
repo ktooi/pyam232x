@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from argparse import ArgumentParser
+import sys
 import json
 from logging import basicConfig, getLogger, DEBUG, INFO
 from . import AM232x
+from . import __version__
 
 
 # これはメインのファイルにのみ書く
@@ -52,6 +54,7 @@ def parse_args():
     parser.add_argument('-b', '--bus', dest="bus", type=int, default=1, help="Bus number.")
     parser.add_argument('-q', '--quick', dest="quick", action='store_true',
                         help="Quickly response mode. The response will be faster, but the output data will be outdated.")
+    parser.add_argument('-v', '--version', dest="version", action='store_true', help="Output version information.")
     parser.set_defaults(func=default, subcommand="default")
     subparsers = parser.add_subparsers(dest="subcommand")
 
@@ -108,5 +111,9 @@ def main():
     if args.debug:
         logger.info("Set loglevel to debug.")
         logger.setLevel(DEBUG)
+    if args.version:
+        print("am232x(pyam232x) {pyam232x_version}\n\nPython {python_version}"
+              .format(pyam232x_version=__version__, python_version=sys.version))
+        exit(0)
     am232x = AM232x(name="am232x", bus=args.bus)
     args.func(am232x, args)
